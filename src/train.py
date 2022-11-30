@@ -18,7 +18,7 @@ from model import transitionDataset, transitionModel
 EMBEDDING_SIZE = 1324
 MAX_VOCAB_SIZE = 4913
 
-NUM_EPOCHS = 50
+NUM_EPOCHS = 10
 BATCH_SIZE = 16
 LEARNING_RATE = 0.001
 
