@@ -10,7 +10,7 @@ from scipy import stats
 import math
 import os
 
-#os.chdir(os.path.dirname(__file__))
+os.chdir(os.path.dirname(__file__))
 config = configparser.ConfigParser()
 config.read("path.ini")
 
@@ -54,7 +54,7 @@ def create_positionmatrix():
     commongen2id, _,oov = load_vocabs()
     position_matrix = np.zeros((len(commongen2id), len(commongen2id)), dtype=float)
     #Only read train
-    with open(config['commongen']['eval_plan'], "r", encoding="utf8") as f:
+    with open(config['commongen']['subtrain_plan'], "r", encoding="utf8") as f:
         lines = f.readlines()
         for line in tqdm(lines):
             vocabs = []
@@ -72,7 +72,9 @@ def create_positionmatrix():
                     position_matrix[i][j] = 1
     print(np.count_nonzero(position_matrix ))
     print(np.nonzero(position_matrix[0]))
-    np.savez(config['commongen']['eval_pos'], transition=position_matrix)
+    np.savez(config['commongen']['subtrain_pos'], transition=position_matrix)
+
+
 
 
 def topk_permutation(tran_matrix, k, cn_set):
@@ -104,7 +106,6 @@ def topk_permutation(tran_matrix, k, cn_set):
     dictdata = []
     for l in topk:
         dictdata.append([cn_set[i] for i in l[1]])
-    print(len(dictdata))
     return dictdata
 
 
@@ -191,7 +192,3 @@ def metric(matrix, plan):
     #print("concepts' average tau is: ", metric_print)
     return metric_print
 
-test = np.ones((4913,4913))
-temp = (metric(test,"eval_plan"))
-print(temp)
-    
