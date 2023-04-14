@@ -12,10 +12,8 @@ import torch
 import fasttext.util
 import itertools as it
 from itertools import product
-import math
-import torchtext
-import gensim
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 config = configparser.ConfigParser()
 config.read("path.ini")
 conceptnet_path = 'conceptnet570'
@@ -58,11 +56,25 @@ def split_dataset(filename, train_ratio=0.8, val_ratio=0.1, test_ratio=0.1):
     with open(filename, 'r') as f:
         data = f.readlines()
 
+    #Align the vocabs
+    oov = {}
+    with open(config['commongen']["oov"], "r", encoding="utf8") as f:
+        for line in f.readlines():
+            original_w, addressed_w = line.split("\t")[0].strip(), line.split("\t")[1].strip()
+            oov[original_w] = addressed_w
+            
     # 按 concept set 对数据进行分组，并将拥有相同 concept set 的行放到相邻的位置
     groups = {}
     for line in data:
-        cols = line.strip().split()
-        concept_set = frozenset(cols[0].split(','))
+        cols = line.strip().split("\t")
+        words = cols[0].split(' ')
+        vocabs = []
+        for word in words:
+            if word in oov.keys():
+                    vocabs.append(oov[word])
+            else:
+                vocabs.append(word)
+        concept_set = frozenset(vocabs)
         if concept_set not in groups:
             groups[concept_set] = []
         groups[concept_set].append(line)
@@ -91,16 +103,35 @@ def split_dataset(filename, train_ratio=0.8, val_ratio=0.1, test_ratio=0.1):
     return train_data, val_data, test_data
 
 
+def generate_plan_matrix(filename,savename):
+    commongen2id = {}
+    id2commongen = {}
+    
+    with open(config['commongen']['addressed_vocab'], 'r', encoding="utf8") as f:
+        for w in f.readlines():
+            word = w.strip()
+            commongen2id[word] = len(commongen2id)
+            id2commongen[len(id2commongen)] = word
+    print("commongen2id done")
+    
+    result_sample = np.zeros((len(commongen2id), len(commongen2id)), dtype=float)
+    start_sample = np.zeros((len(commongen2id),), dtype=float)
+    total_sample = np.zeros((len(commongen2id),), dtype=float)
+    with open(filename, "r", encoding="utf8") as f:
+        lines = f.readlines()
+        for line in tqdm(lines):
+            words = line.split("\t")[0].strip().split(' ')
+            commongen_id = [commongen2id[c] for c in words]
+
+            start_sample[commongen_id[0]] += 1
+            for i in range(len(commongen_id) - 1):
+                result_sample[commongen_id[i]][commongen_id[i + 1]] += 1
+                total_sample[commongen_id[i]] += 1
+    transition_matrix = np.divide(result_sample, total_sample[:, None],
+                                  out=np.zeros_like(result_sample, dtype=np.float64), where=total_sample[:, None] != 0)
+    np.savez(savename, transition=transition_matrix)
+    print(np.count_nonzero(result_sample))
 
 
 if __name__ == "__main__":
-    train_data, val_data, test_data = split_dataset("plan.txt")
-    # 将划分后的数据集保存到不同的文件中
-    with open('train.txt', 'w') as f:
-        f.writelines(train_data)
-
-    with open('val.txt', 'w') as f:
-        f.writelines(val_data)
-
-    with open('test.txt', 'w') as f:
-        f.writelines(test_data)
+    generate_plan_matrix("test.txt","test_matrix.npz")

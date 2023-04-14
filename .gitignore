@@ -1,1 +1,3 @@
 utils/cc.en.300.bin
+matrix/test_matrix.npz
+matrix/train_matrix.npz
