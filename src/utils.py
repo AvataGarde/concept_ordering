@@ -88,7 +88,6 @@ def topk_permutation(tran_matrix, k, cn_set):
     Returns:
         the list of topk permuations
     """
-    k = 1
     
     res = dict()
     concept_index = range(len(cn_set))
@@ -172,7 +171,7 @@ def metric(matrix, plan):
         #Generate the transition matrix 
         trans_matrix = predicted_matrix(matrix, commongen2id, cn_set)
         #Generate the topk possibilityies 
-        topk_order = topk_permutation(trans_matrix, len(labels), cn_set)
+        topk_order = topk_permutation(trans_matrix, 1, cn_set)
         #Calculate tau
         res = calculate_tau(labels, topk_order)
         iteration += 1

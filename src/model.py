@@ -46,7 +46,9 @@ class TransitionModel(nn.Module):
             nn.Tanh(),
             nn.Linear(self.h_d, self.h_d)
         )
-
+        self.alpha = 0.1
+        
+        
     def forward(self, i, j):
         # embedding
         vi = self.v(i)
@@ -71,10 +73,10 @@ class TransitionModel(nn.Module):
             _type_: Mean squared loss as shown in Eq 7
         """
         mse_loss = nn.MSELoss()
-        alpha = 0.
         l_c = mse_loss(output, Mc_p)
         l_g = mse_loss(output, Mg_p)
-        loss = alpha * l_c + (1-alpha) * l_g
+        loss = self.alpha * l_c + (1 - self.alpha) * l_g
+        
         return loss
 
     def get_matrix(self):

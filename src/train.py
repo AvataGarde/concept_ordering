@@ -26,7 +26,7 @@ save_every = 10000
 
 config = configparser.ConfigParser()
 config.read("path.ini")
-
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def load_trans_matrix(dataset_type):
     if dataset_type == 'train':
@@ -57,7 +57,6 @@ def load_init_embedding():
 
 def load_model():
     model_path = config['model']['model_path']
-    embed_path = config['commongen']['fasttext_embed']
     pretrained_emb = load_init_embedding()
     model = TransitionModel(MAX_VOCAB_SIZE, EMBEDDING_SIZE, pretrained_emb)
     model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
@@ -124,8 +123,8 @@ def train(model, train_loader, eval_loader, optimizer, scheduler):
                 best_eval_loss = eval_loss
                 best_h_matrix = h_matrix
                 best_eval_metrics = eval_metrics
-                #torch.save(model.state_dict(), config['model']['model_path'])
-                #print('Saved the best model.')
+                torch.save(model.state_dict(), config['model']['model_path'])
+                print('Saved the best model.')
                 print('Current metric score: %.4f' % eval_metrics)
             
         # Record the training and validation losses
@@ -152,7 +151,7 @@ if __name__ == '__main__':
     
     init_embedding = load_init_embedding()
     
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    
     model = TransitionModel(MAX_VOCAB_SIZE, EMBEDDING_SIZE, init_embedding)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(),lr=LEARNING_RATE, betas=(0.9, 0.999))
@@ -178,9 +177,10 @@ if __name__ == '__main__':
     plt.xlabel('Epoch')
     plt.ylabel('Score')
     plt.show()
-    # Save the best h_matrix and metric score to file
+    # Save the best h_matrix to file
     np.savez(config['model']['output_path'], transition=best_h_matrix)
-    np.savetxt(config['model']['output_path'] + '.txt', np.array([eval_metrics_history[-1]]))
+    
+
 
 
 
