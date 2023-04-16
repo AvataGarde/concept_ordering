@@ -46,7 +46,7 @@ class TransitionModel(nn.Module):
             nn.Tanh(),
             nn.Linear(self.h_d, self.h_d)
         )
-        self.alpha = 0.1
+        self.alpha = 0.0
         
         
     def forward(self, i, j):
@@ -70,7 +70,7 @@ class TransitionModel(nn.Module):
             Mg_p : The transition probability from concept i to concept j in the Mg
             Mc_p : The transition probability from concept i to concept j in the Mc
         Returns:
-            _type_: Mean squared loss as shown in Eq 7
+            _type_: Mean squared loss 
         """
         mse_loss = nn.MSELoss()
         l_c = mse_loss(output, Mc_p)

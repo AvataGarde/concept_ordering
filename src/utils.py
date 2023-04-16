@@ -50,11 +50,10 @@ def load_vocabs():
     return commongen2id, id2commongen, oov
 
 
-def create_positionmatrix():
+def create_positionmatrix(plan, pos):
     commongen2id, _,oov = load_vocabs()
     position_matrix = np.zeros((len(commongen2id), len(commongen2id)), dtype=float)
-    #Only read train
-    with open(config['commongen']['subtrain_plan'], "r", encoding="utf8") as f:
+    with open(config['commongen'][plan], "r", encoding="utf8") as f:
         lines = f.readlines()
         for line in tqdm(lines):
             vocabs = []
@@ -66,13 +65,11 @@ def create_positionmatrix():
                     vocabs.append(word)
             commongen_id = [commongen2id[c] for c in vocabs]
 
-
             for i in commongen_id:
                 for j in commongen_id:
                     position_matrix[i][j] = 1
     print(np.count_nonzero(position_matrix ))
-    print(np.nonzero(position_matrix[0]))
-    np.savez(config['commongen']['subtrain_pos'], transition=position_matrix)
+    np.savez(config['commongen'][pos], transition=position_matrix)
 
 
 
@@ -184,7 +181,8 @@ def metric(matrix, plan):
 
 
 if __name__ == '__main__':
-    M_g = np.load(config['commongen']['eval'])["transition"]
-    print(metric(M_g, 'train_plan'))
+    M_g = np.load(config['commongen']['train'])["transition"]
+
+    
     
 

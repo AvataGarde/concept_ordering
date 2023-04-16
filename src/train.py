@@ -18,9 +18,9 @@ from model import TransitionDataset, TransitionModel
 EMBEDDING_SIZE = 300
 MAX_VOCAB_SIZE = 4913
 
-NUM_EPOCHS = 15
+NUM_EPOCHS = 50
 BATCH_SIZE = 16
-LEARNING_RATE = 0.0003
+LEARNING_RATE = 0.001
 
 save_every = 10000
 
@@ -41,8 +41,14 @@ def load_trans_matrix(dataset_type):
             'M_c': config['commongen']['m2'],
             'M_p': config['commongen']['eval_pos'],
         }
+    elif dataset_type == 'test':
+        files = {
+            'M_g': config['commongen']['test'],
+            'M_c': config['commongen']['m2'],
+            'M_p': config['commongen']['test_pos'],
+        }
     else:
-        raise ValueError(f"Invalid dataset type: {dataset_type}. Must be either 'train' or 'eval'.")
+        raise ValueError(f"Invalid dataset type: {dataset_type}. Must be either 'train' or 'eval' or 'test'.")
 
     M_g = torch.tensor(np.load(files['M_g'])['transition'], dtype=torch.float)
     M_c = torch.tensor(np.load(files['M_c'])['transition'], dtype=torch.float)
@@ -116,6 +122,7 @@ def train(model, train_loader, eval_loader, optimizer, scheduler):
             
             # Generate matrix and compute the metric score
             h_matrix = model.get_matrix()
+            train_metrics = metric(h_matrix, "eval_plan")
             eval_metrics = metric(h_matrix, "eval_plan")
             
             # Record the best h_matrix and metric score
