@@ -3,5 +3,4 @@ matrix/
 __pycache__/
 src/train2.py
 src/model2.py
-model/
 utils/
