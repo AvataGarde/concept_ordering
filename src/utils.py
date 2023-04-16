@@ -119,17 +119,6 @@ def calculate_tau(labels, perdicted_topk):
     Returns:
         _type_: _description_
     """ 
-    """
-    res = []
-    for i in labels:
-        temp_max = -1
-        for j in perdicted_topk:
-            temp,_ = stats.kendalltau(i,j)
-            if temp > temp_max:
-                temp_max = temp
-        res.append(temp_max)
-    return np.mean(res)
-    """   
     temp_max = -1
     for i in labels:
         for j in perdicted_topk:
@@ -191,4 +180,12 @@ def metric(matrix, plan):
     metric_print = metric_avg / iteration
     #print("concepts' average tau is: ", metric_print)
     return metric_print
+
+
+
+
+if __name__ == '__main__':
+    M_g = np.load(config['commongen']['eval'])["transition"]
+    print(metric(M_g, 'train_plan'))
+    
 

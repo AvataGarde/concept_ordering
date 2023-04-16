@@ -1,3 +1,5 @@
 utils/cc.en.300.bin
-matrix/test_matrix.npz
-matrix/train_matrix.npz
+matrix/
+__pycache__/
+src/train2.py
+src/model2.py
